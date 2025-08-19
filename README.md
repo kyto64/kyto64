@@ -1,9 +1,13 @@
-## About Me
+## 👋 About Me
 
-Hi there 👋
-I'm kyto64 from Japan.
+Hi there.<br>I'm [Keito Kira](https://kyto64.com) from Japan🗾
 
-## Public Contributions
+## 🛠️ Works
+
+- [Kontri - Discover open-source projects that match your skills and interests](https://kontri.kyto64.com/)
+- [Coppiett for Windows - Light-Weight Clipboard Manager for windows](https://github.com/kyto64/Copipett-win)
+
+## 🧩 Public Contributions
 
 - https://github.com/aws/aws-sdk-rails/pull/102
 - https://github.com/aws/aws-sdk-rails/pull/107
