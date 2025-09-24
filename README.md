@@ -12,4 +12,5 @@ Hi there.<br>I'm [Keito Kira](https://kyto64.com) from Japan🗾
 
 - https://github.com/aws/aws-sdk-rails/pull/102
 - https://github.com/aws/aws-sdk-rails/pull/107
+- https://github.com/joke2k/faker/pull/2251 (coauthored)
 - https://github.com/rspec-parameterized/rspec-parameterized-table_syntax/pull/7
