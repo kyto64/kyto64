@@ -1,6 +1,6 @@
 # About Me
 
-Hi there.<br>I'm [Keito Kira](https://kyto64.com) from Japan🗾
+Hi there.<br>I'm [Keito Kira](https://kyto.jp) from Japan🗾
 
 ## 🛠️ Stuff I Made
 
