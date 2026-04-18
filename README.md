@@ -11,7 +11,6 @@ Hi there.<br>I'm [Keito Kira](https://kyto.jp) from Japan🗾
 
 ## 🛠️ Stuff I Made
 
-- [number-plate-japan.csv - Provide CSV data listing Japanese vehicle license plate information](https://github.com/kyto64/number-plate-japan.csv)
 - [WSL2 Disk Volume Optimizer - a PowerShell-based automation tool designed to resolve disk space issues in WSL2 environments](https://github.com/kyto64/WSL2_Disk_Volume_Optimizer)
 
 ## 🚀 Sample Apps
