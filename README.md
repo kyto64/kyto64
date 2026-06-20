@@ -12,6 +12,7 @@ Hi there.<br>I'm [Keito Kira](https://kyto.jp) from Japan🗾
 ## 🛠️ Stuff I Made
 
 - [WSL2 Disk Volume Optimizer - a PowerShell-based automation tool designed to resolve disk space issues in WSL2 environments](https://github.com/kyto64/WSL2_Disk_Volume_Optimizer)
+- [Codex pr-review-toolkit (minimal) - Safe, lightweight PR review skills for Codex CLI](https://github.com/kyto64/codex-pr-review-toolkit-minimal)
 
 ## 🚀 Sample Apps
 - [CodeReviewApp - Full-stack application that utilizes WebLLM for LLM-based code reviews, featuring a Vue.js frontend and FastAPI backend backed by an RDB, with infrastructure managed via Terraform for IaC and a CI/CD pipeline.](https://github.com/kyto64/sampleApp_CodeReview)
