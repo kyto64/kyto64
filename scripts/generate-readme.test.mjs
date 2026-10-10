@@ -1,0 +1,283 @@
+import assert from "node:assert/strict";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import test from "node:test";
+
+import {
+  GenerateError,
+  generateReadme,
+  parseHumanMd,
+  parseItem,
+} from "./generate-readme.mjs";
+
+const here = fileURLToPath(new URL(".", import.meta.url));
+const scriptPath = join(here, "generate-readme.mjs");
+
+function fixture(name) {
+  return readFileSync(join(here, "fixtures", name), "utf8");
+}
+
+function runCli(args, options = {}) {
+  return spawnSync(process.execPath, [scriptPath, ...args], {
+    encoding: "utf8",
+    ...options,
+  });
+}
+
+test("想定 human.md から README を組み立てる", () => {
+  const actual = generateReadme(fixture("human.full.md"));
+  assert.equal(actual, fixture("readme.full.md"));
+});
+
+test("Contributions と Made が無いときはその節を省略する", () => {
+  const actual = generateReadme(fixture("human.without-optional.md"));
+  assert.equal(actual, fixture("readme.without-optional.md"));
+  assert.doesNotMatch(actual, /Stuff I Made/);
+  assert.doesNotMatch(actual, /Community Contributions/);
+});
+
+test("Stuff I Made は Now と同じ名前の項目を除外する", () => {
+  const actual = generateReadme(fixture("human.full.md"));
+  const made = actual.split("## 🛠️ Stuff I Made")[1].split("## ")[0];
+  assert.match(actual, /## 🚧 Now/);
+  assert.match(actual, /\[youtublur - /);
+  assert.doesNotMatch(made, /youtublur/);
+  assert.match(made, /WSL2 Disk Volume Optimizer/);
+  assert.match(made, /Codex pr-review-toolkit/);
+  assert.match(made, /CodeReviewApp/);
+});
+
+test("名前の大小差だけでも Now と Made は同一項目とみなす", () => {
+  const source = `# x
+
+## About
+
+hello
+
+## Now
+
+- **Youtublur** — current work https://example.com/now
+
+## Made
+
+- **youtublur** — older copy https://example.com/made
+- **other** — stays https://example.com/other
+`;
+  const actual = generateReadme(source);
+  const made = actual.split("## 🛠️ Stuff I Made")[1].split("## ")[0];
+  assert.match(actual, /\[Youtublur - current work\]/);
+  assert.doesNotMatch(made, /youtublur/i);
+  assert.match(made, /\[other - stays\]/);
+});
+
+test("Made が Now と全部重なるときは Stuff I Made を省略する", () => {
+  const source = `# x
+
+## About
+
+hello
+
+## Now
+
+- **youtublur** — current work https://example.com/now
+
+## Made
+
+- **youtublur** — older copy https://example.com/made
+`;
+  const actual = generateReadme(source);
+  assert.doesNotMatch(actual, /Stuff I Made/);
+});
+
+test("Contributions の説明は human.md の文言だけを使い、無いときはリポジトリ名と PR 番号にする", () => {
+  const source = `# x
+
+## About
+
+hello
+
+## Contributions
+
+- **aws-sdk-rails** — https://github.com/aws/aws-sdk-rails/pull/102
+- **faker** — ja_JP locale helpers https://github.com/joke2k/faker/pull/2251
+`;
+  const actual = generateReadme(source);
+  assert.match(
+    actual,
+    /\[aws-sdk-rails - #102\]\(https:\/\/github.com\/aws\/aws-sdk-rails\/pull\/102\)/,
+  );
+  assert.match(
+    actual,
+    /\[faker - ja_JP locale helpers\]\(https:\/\/github.com\/joke2k\/faker\/pull\/2251\)/,
+  );
+  assert.doesNotMatch(actual, /Add Automotive/);
+  assert.doesNotMatch(actual, /deduplication/);
+});
+
+test("Links と公開リポジトリ一覧は README に出さない", () => {
+  const actual = generateReadme(fixture("human.full.md"));
+  assert.doesNotMatch(actual, /## .*Links/);
+  assert.doesNotMatch(actual, /Works:/);
+  assert.doesNotMatch(actual, /zenn\.dev/);
+});
+
+test("自動生成コメントと既存の雰囲気を残す", () => {
+  const actual = generateReadme(fixture("human.full.md"));
+  assert.match(
+    actual,
+    /<!-- この README は https:\/\/kyto\.jp\/human\.md から自動生成されています -->/,
+  );
+  assert.match(actual, /^# About Me$/m);
+  assert.match(
+    actual,
+    /Hi there\.<br>I'm \[Keito Kira\]\(https:\/\/kyto\.jp\) from Japan🗾/,
+  );
+  assert.match(actual, /## 🚧 Now/);
+  assert.match(actual, /## 🛠️ Stuff I Made/);
+  assert.match(actual, /## 🧩 Community Contributions/);
+  assert.match(actual, /## 🧰 Stack/);
+  assert.match(actual, /## ❤️ Likes/);
+  assert.match(actual, /## ✉️ Work with me/);
+});
+
+test("About が無いと失敗する", () => {
+  const source = `## Now\n\n- **youtublur** — blur https://example.com/y\n`;
+  assert.throws(() => generateReadme(source), GenerateError);
+  assert.throws(() => generateReadme(source), /About/);
+});
+
+test("空の human.md は失敗する", () => {
+  assert.throws(() => generateReadme(""), GenerateError);
+  assert.throws(() => generateReadme("   \n"), GenerateError);
+});
+
+test("HTML（チャレンジページなど）は失敗する", () => {
+  const html = `<!DOCTYPE html><html><head><title>Just a moment...</title></head></html>`;
+  assert.throws(() => generateReadme(html), GenerateError);
+  assert.throws(() => generateReadme(html), /HTML/);
+});
+
+test("リスト節の項目形式が違うと失敗する", () => {
+  const source = `# x
+
+## About
+
+hello
+
+## Now
+
+- youtublur is missing the expected markup
+`;
+  assert.throws(() => generateReadme(source), GenerateError);
+  assert.throws(() => generateReadme(source), /Now/);
+});
+
+test("空のリスト節は失敗する", () => {
+  const source = `# x
+
+## About
+
+hello
+
+## Now
+
+`;
+  assert.throws(() => generateReadme(source), GenerateError);
+  assert.throws(() => generateReadme(source), /Now/);
+});
+
+test("項目を名前・説明・URL に分解する", () => {
+  assert.deepEqual(
+    parseItem(
+      "now",
+      "- **youtublur** — a Chrome extension. https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj",
+    ),
+    {
+      name: "youtublur",
+      description: "a Chrome extension.",
+      url: "https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj",
+      urls: [
+        "https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj",
+      ],
+    },
+  );
+});
+
+test("名前の後ろの (sample) と複数 PR URL を扱う", () => {
+  const qualifier = parseItem(
+    "made",
+    "- **CodeReviewApp** (sample) — full-stack app using WebLLM. https://github.com/kyto64/sampleApp_CodeReview",
+  );
+  assert.equal(qualifier.name, "CodeReviewApp (sample)");
+  assert.equal(qualifier.description, "full-stack app using WebLLM.");
+
+  const source = `# x
+
+## About
+
+hello
+
+## Contributions
+
+- **aws/aws-sdk-rails** — https://github.com/aws/aws-sdk-rails/pull/102, https://github.com/aws/aws-sdk-rails/pull/107
+- **joke2k/faker (co-authored)** — https://github.com/joke2k/faker/pull/2251
+`;
+  const actual = generateReadme(source);
+  assert.match(
+    actual,
+    /\[aws\/aws-sdk-rails - #102\]\(https:\/\/github.com\/aws\/aws-sdk-rails\/pull\/102\)/,
+  );
+  assert.match(
+    actual,
+    /\[aws\/aws-sdk-rails - #107\]\(https:\/\/github.com\/aws\/aws-sdk-rails\/pull\/107\)/,
+  );
+  assert.match(
+    actual,
+    /\[joke2k\/faker \(co-authored\) - #2251\]\(https:\/\/github.com\/joke2k\/faker\/pull\/2251\)/,
+  );
+});
+
+test("本番 human.md から README を組み立てる", () => {
+  const actual = generateReadme(fixture("human.production.md"));
+  assert.equal(actual, fixture("readme.production.md"));
+  assert.match(actual, /## 🚧 Now/);
+  assert.match(actual, /\[youtublur - /);
+  const made = actual.split("## 🛠️ Stuff I Made")[1].split("## ")[0];
+  assert.doesNotMatch(made, /youtublur/);
+  assert.match(made, /CodeReviewApp \(sample\)/);
+  assert.match(actual, /aws\/aws-sdk-rails - #102/);
+  assert.match(actual, /aws\/aws-sdk-rails - #107/);
+});
+
+test("URL の無い項目はリンクにしない", () => {
+  const parsed = parseHumanMd(fixture("human.without-optional.md"));
+  const now = parsed.get("now");
+  assert.equal(now.items[1].url, "");
+  assert.equal(now.items[2].name, "kyto.jp");
+});
+
+test("CLI は成功時だけ出力ファイルを書き、失敗時は既存 README を残す", () => {
+  const dir = mkdtempSync(join(tmpdir(), "readme-gen-"));
+  const readmePath = join(dir, "README.md");
+  const original = "# keep me\n";
+  writeFileSync(readmePath, original);
+
+  const ok = runCli([join(here, "fixtures", "human.full.md"), readmePath]);
+  assert.equal(ok.status, 0, ok.stderr);
+  assert.equal(readFileSync(readmePath, "utf8"), fixture("readme.full.md"));
+
+  const broken = join(dir, "broken.md");
+  writeFileSync(broken, "## Now\n\n- nope\n");
+  const fail = runCli([broken, readmePath]);
+  assert.notEqual(fail.status, 0);
+  assert.equal(readFileSync(readmePath, "utf8"), fixture("readme.full.md"));
+});
+
+test("CLI は入力省略時に使い方を出して失敗する", () => {
+  const result = runCli([]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /使い方/);
+});
