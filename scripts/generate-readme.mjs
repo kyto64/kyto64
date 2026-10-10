@@ -150,14 +150,18 @@ function parseSectionBody(key, body) {
         `節 ${displayName(key)} に想定した項目がありません`,
       );
     }
-    return { kind: "list", items: lines.map((line) => parseItem(key, line)) };
+    return {
+      kind: "list",
+      items: lines.flatMap((line) => expandItem(parseItem(key, line))),
+    };
   }
 
   return { kind: "prose", text: body.trim() };
 }
 
 const ITEM_RE =
-  /^- \*\*(.+?)\*\*\s+[—–−-]\s+(.+)$/;
+  /^- \*\*(.+?)\*\*((?:\s+\([^)]+\))*)\s+[—–−-]\s+(.+)$/;
+const URL_RE = /https?:\/\/[^\s,]+/g;
 
 export function parseItem(sectionKey, line) {
   const match = line.trim().match(ITEM_RE);
@@ -167,26 +171,33 @@ export function parseItem(sectionKey, line) {
     );
   }
 
-  const name = match[1].trim();
-  const rest = match[2].trim();
+  const name = `${match[1].trim()}${match[2] ?? ""}`.replace(/\s+/g, " ").trim();
+  const rest = match[3].trim();
   if (!name) {
     throw new GenerateError(
       `節 ${displayName(sectionKey)} の項目名が空です: ${line}`,
     );
   }
 
-  const urlMatch = rest.match(/^(.*?)(?:\s+)(https?:\/\/\S+)$/);
-  if (urlMatch) {
-    const description = urlMatch[1].trim();
-    const url = stripTrailingPunctuation(urlMatch[2]);
-    return { name, description, url };
+  const urls = [...rest.matchAll(URL_RE)].map((found) =>
+    stripTrailingPunctuation(found[0]),
+  );
+  let description = rest;
+  for (const url of urls) {
+    description = description.replace(url, "");
   }
+  description = description.replace(/\s+/g, " ").replace(/^[,\s]+|[,\s]+$/g, "").trim();
 
-  if (/^https?:\/\/\S+$/.test(rest)) {
-    return { name, description: "", url: stripTrailingPunctuation(rest) };
-  }
+  return { name, description, url: urls[0] ?? "", urls };
+}
 
-  return { name, description: rest, url: "" };
+function expandItem(item) {
+  const urls = item.urls.length > 0 ? item.urls : [item.url || ""];
+  return urls.map((url) => ({
+    name: item.name,
+    description: item.description,
+    url,
+  }));
 }
 
 function stripTrailingPunctuation(url) {

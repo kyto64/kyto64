@@ -199,8 +199,57 @@ test("項目を名前・説明・URL に分解する", () => {
       name: "youtublur",
       description: "a Chrome extension.",
       url: "https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj",
+      urls: [
+        "https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj",
+      ],
     },
   );
+});
+
+test("名前の後ろの (sample) と複数 PR URL を扱う", () => {
+  const qualifier = parseItem(
+    "made",
+    "- **CodeReviewApp** (sample) — full-stack app using WebLLM. https://github.com/kyto64/sampleApp_CodeReview",
+  );
+  assert.equal(qualifier.name, "CodeReviewApp (sample)");
+  assert.equal(qualifier.description, "full-stack app using WebLLM.");
+
+  const source = `# x
+
+## About
+
+hello
+
+## Contributions
+
+- **aws/aws-sdk-rails** — https://github.com/aws/aws-sdk-rails/pull/102, https://github.com/aws/aws-sdk-rails/pull/107
+- **joke2k/faker (co-authored)** — https://github.com/joke2k/faker/pull/2251
+`;
+  const actual = generateReadme(source);
+  assert.match(
+    actual,
+    /\[aws\/aws-sdk-rails - #102\]\(https:\/\/github.com\/aws\/aws-sdk-rails\/pull\/102\)/,
+  );
+  assert.match(
+    actual,
+    /\[aws\/aws-sdk-rails - #107\]\(https:\/\/github.com\/aws\/aws-sdk-rails\/pull\/107\)/,
+  );
+  assert.match(
+    actual,
+    /\[joke2k\/faker \(co-authored\) - #2251\]\(https:\/\/github.com\/joke2k\/faker\/pull\/2251\)/,
+  );
+});
+
+test("本番 human.md から README を組み立てる", () => {
+  const actual = generateReadme(fixture("human.production.md"));
+  assert.equal(actual, fixture("readme.production.md"));
+  assert.match(actual, /## 🚧 Now/);
+  assert.match(actual, /\[youtublur - /);
+  const made = actual.split("## 🛠️ Stuff I Made")[1].split("## ")[0];
+  assert.doesNotMatch(made, /youtublur/);
+  assert.match(made, /CodeReviewApp \(sample\)/);
+  assert.match(actual, /aws\/aws-sdk-rails - #102/);
+  assert.match(actual, /aws\/aws-sdk-rails - #107/);
 });
 
 test("URL の無い項目はリンクにしない", () => {
