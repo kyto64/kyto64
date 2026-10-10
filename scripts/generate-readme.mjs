@@ -2,6 +2,9 @@
 /**
  * kyto.jp/human.md から GitHub プロフィール README を組み立てる。
  * 依存パッケージなし。失敗時は何も書き込まず終了する。
+ *
+ * CI は Bot Fight Mode 回避のため workers.dev から同内容を取得することがあるが、
+ * README のリンクと生成元コメントは常に公開 URL（HUMAN_MD_URL）を指す。
  */
 
 import { readFileSync, writeFileSync, renameSync, unlinkSync } from "node:fs";
