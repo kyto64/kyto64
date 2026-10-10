@@ -29,10 +29,10 @@ Open to almost anything. Just send an email: kira@kyto64.com
 
 ## Contributions
 
-- **aws-sdk-rails** — Add support for selectively choosing deduplication keys. https://github.com/aws/aws-sdk-rails/pull/102
-- **aws-sdk-rails** — Fix negative DelaySeconds being passed to parameter. https://github.com/aws/aws-sdk-rails/pull/107
-- **faker** — Add Automotive providers for ja_JP locale (coauthored) https://github.com/joke2k/faker/pull/2251
-- **rspec-parameterized-table_syntax** — Suppress unnecessary deprecation warning for Ruby v3.1. https://github.com/rspec-parameterized/rspec-parameterized-table_syntax/pull/7
+- **aws-sdk-rails** — https://github.com/aws/aws-sdk-rails/pull/102
+- **aws-sdk-rails** — https://github.com/aws/aws-sdk-rails/pull/107
+- **faker** — https://github.com/joke2k/faker/pull/2251
+- **rspec-parameterized-table_syntax** — https://github.com/rspec-parameterized/rspec-parameterized-table_syntax/pull/7
 
 ## Made
 

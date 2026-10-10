@@ -229,7 +229,8 @@ function displayName(key) {
 
 function renderReadme(sections) {
   const about = sections.get("about");
-  const aboutText = about.kind === "prose" ? about.text : renderItems(about.items);
+  const aboutText =
+    about.kind === "prose" ? about.text : renderItems("about", about.items);
 
   const blocks = [
     `<!-- この README は ${HUMAN_MD_URL} から自動生成されています -->`,
@@ -244,29 +245,56 @@ function renderReadme(sections) {
   for (const spec of README_SECTIONS) {
     const section = sections.get(spec.key);
     if (!section) continue;
-    blocks.push("", `## ${spec.heading}`, "");
     if (section.kind === "list") {
-      blocks.push(renderItems(section.items));
-    } else {
-      blocks.push(section.text);
+      const items = itemsForSection(spec.key, section, sections);
+      if (items.length === 0) continue;
+      blocks.push("", `## ${spec.heading}`, "", renderItems(spec.key, items));
+      continue;
     }
+    blocks.push("", `## ${spec.heading}`, "", section.text);
   }
 
   return `${blocks.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd()}\n`;
 }
 
-function renderItems(items) {
-  return items.map(renderItem).join("\n");
+function itemsForSection(key, section, sections) {
+  if (key !== "made") return section.items;
+
+  const now = sections.get("now");
+  const nowNames = new Set(
+    (now?.kind === "list" ? now.items : []).map((item) => normalizeName(item.name)),
+  );
+  return section.items.filter((item) => !nowNames.has(normalizeName(item.name)));
 }
 
-function renderItem(item) {
-  const label = item.description
-    ? `${item.name} - ${item.description}`
-    : item.name;
+function normalizeName(name) {
+  return name.trim().toLowerCase();
+}
+
+function renderItems(sectionKey, items) {
+  return items.map((item) => renderItem(sectionKey, item)).join("\n");
+}
+
+function renderItem(sectionKey, item) {
+  const description = resolveDescription(sectionKey, item);
+  const label = description ? `${item.name} - ${description}` : item.name;
   if (item.url) {
     return `- [${label}](${item.url})`;
   }
   return `- ${label}`;
+}
+
+function resolveDescription(sectionKey, item) {
+  if (item.description) return item.description;
+  if (sectionKey !== "contributions") return "";
+  const pr = prNumberFromUrl(item.url);
+  return pr ? `#${pr}` : "";
+}
+
+function prNumberFromUrl(url) {
+  if (!url) return "";
+  const match = url.match(/\/pull\/(\d+)/);
+  return match ? match[1] : "";
 }
 
 function isDirectRun(argv1) {

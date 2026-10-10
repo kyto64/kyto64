@@ -39,6 +39,84 @@ test("Contributions と Made が無いときはその節を省略する", () => 
   assert.doesNotMatch(actual, /Community Contributions/);
 });
 
+test("Stuff I Made は Now と同じ名前の項目を除外する", () => {
+  const actual = generateReadme(fixture("human.full.md"));
+  const made = actual.split("## 🛠️ Stuff I Made")[1].split("## ")[0];
+  assert.match(actual, /## 🚧 Now/);
+  assert.match(actual, /\[youtublur - /);
+  assert.doesNotMatch(made, /youtublur/);
+  assert.match(made, /WSL2 Disk Volume Optimizer/);
+  assert.match(made, /Codex pr-review-toolkit/);
+  assert.match(made, /CodeReviewApp/);
+});
+
+test("名前の大小差だけでも Now と Made は同一項目とみなす", () => {
+  const source = `# x
+
+## About
+
+hello
+
+## Now
+
+- **Youtublur** — current work https://example.com/now
+
+## Made
+
+- **youtublur** — older copy https://example.com/made
+- **other** — stays https://example.com/other
+`;
+  const actual = generateReadme(source);
+  const made = actual.split("## 🛠️ Stuff I Made")[1].split("## ")[0];
+  assert.match(actual, /\[Youtublur - current work\]/);
+  assert.doesNotMatch(made, /youtublur/i);
+  assert.match(made, /\[other - stays\]/);
+});
+
+test("Made が Now と全部重なるときは Stuff I Made を省略する", () => {
+  const source = `# x
+
+## About
+
+hello
+
+## Now
+
+- **youtublur** — current work https://example.com/now
+
+## Made
+
+- **youtublur** — older copy https://example.com/made
+`;
+  const actual = generateReadme(source);
+  assert.doesNotMatch(actual, /Stuff I Made/);
+});
+
+test("Contributions の説明は human.md の文言だけを使い、無いときはリポジトリ名と PR 番号にする", () => {
+  const source = `# x
+
+## About
+
+hello
+
+## Contributions
+
+- **aws-sdk-rails** — https://github.com/aws/aws-sdk-rails/pull/102
+- **faker** — ja_JP locale helpers https://github.com/joke2k/faker/pull/2251
+`;
+  const actual = generateReadme(source);
+  assert.match(
+    actual,
+    /\[aws-sdk-rails - #102\]\(https:\/\/github.com\/aws\/aws-sdk-rails\/pull\/102\)/,
+  );
+  assert.match(
+    actual,
+    /\[faker - ja_JP locale helpers\]\(https:\/\/github.com\/joke2k\/faker\/pull\/2251\)/,
+  );
+  assert.doesNotMatch(actual, /Add Automotive/);
+  assert.doesNotMatch(actual, /deduplication/);
+});
+
 test("Links と公開リポジトリ一覧は README に出さない", () => {
   const actual = generateReadme(fixture("human.full.md"));
   assert.doesNotMatch(actual, /## .*Links/);
