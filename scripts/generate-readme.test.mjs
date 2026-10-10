@@ -143,6 +143,34 @@ test("自動生成コメントと既存の雰囲気を残す", () => {
   assert.match(actual, /## ✉️ Work with me/);
 });
 
+test("生成コメントは取得元が workers.dev でも kyto.jp/human.md のまま", () => {
+  const actual = generateReadme(fixture("human.production.md"));
+  assert.match(
+    actual,
+    /<!-- この README は https:\/\/kyto\.jp\/human\.md から自動生成されています -->/,
+  );
+  assert.doesNotMatch(actual, /workers\.dev/);
+  assert.doesNotMatch(actual, /kyto-mypage/);
+});
+
+test("Update README workflow は workers.dev を env で差し替えられる", () => {
+  const yaml = readFileSync(
+    join(here, "..", ".github", "workflows", "update-readme.yml"),
+    "utf8",
+  );
+  assert.match(yaml, /HUMAN_MD_FETCH_URL:/);
+  assert.match(
+    yaml,
+    /https:\/\/kyto-mypage\.kira-24e\.workers\.dev\/human\.md/,
+  );
+  assert.match(yaml, /\$\{HUMAN_MD_FETCH_URL\}/);
+  assert.match(yaml, /Bot Fight Mode/);
+  assert.match(yaml, /vars\.HUMAN_MD_FETCH_URL/);
+  assert.match(yaml, /inputs\.human_md_url/);
+  const fetchStep = yaml.split("name: Fetch human.md")[1] ?? "";
+  assert.doesNotMatch(fetchStep, /curl[\s\S]*https:\/\/kyto\.jp\/human\.md/);
+});
+
 test("About が無いと失敗する", () => {
   const source = `## Now\n\n- **youtublur** — blur https://example.com/y\n`;
   assert.throws(() => generateReadme(source), GenerateError);

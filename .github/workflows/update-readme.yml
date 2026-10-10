@@ -4,6 +4,20 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      human_md_url:
+        description: "human.md の取得 URL（未指定なら HUMAN_MD_FETCH_URL）"
+        required: false
+        type: string
+
+# kyto.jp ゾーンの Cloudflare Bot Fight Mode が GitHub Actions（Azure）の
+# 発信元 IP を 403 にする。Free プランでは特定パスだけ例外にできないため、
+# 同じ Worker の workers.dev（kyto.jp ゾーン外、中身は同じ）から取得する。
+# README 内のリンクと「生成元」コメントは https://kyto.jp/human.md のまま。
+# 取得 URL は env HUMAN_MD_FETCH_URL / vars.HUMAN_MD_FETCH_URL /
+# workflow_dispatch の human_md_url で差し替えられる。
+env:
+  HUMAN_MD_FETCH_URL: ${{ inputs.human_md_url || vars.HUMAN_MD_FETCH_URL || 'https://kyto-mypage.kira-24e.workers.dev/human.md' }}
 
 permissions:
   contents: write
@@ -22,13 +36,14 @@ jobs:
       - name: Fetch human.md
         run: |
           set -euo pipefail
+          echo "Fetching ${HUMAN_MD_FETCH_URL}"
           curl -fsSL \
             --retry 3 \
             --retry-delay 2 \
             -A "kyto64-readme-sync (https://github.com/kyto64/kyto64)" \
             -H "Accept: text/markdown, text/plain;q=0.9, */*;q=0.1" \
             -o /tmp/human.md \
-            "https://kyto.jp/human.md"
+            "${HUMAN_MD_FETCH_URL}"
 
           if head -c 200 /tmp/human.md | grep -Eiq '<!DOCTYPE html|<html|Just a moment'; then
             echo "human.md の取得結果が HTML です。README は更新しません。" >&2
