@@ -27,12 +27,12 @@ kyto is an indie developer in Fukuoka who builds small, fast tools, with AI codi
 
 ## 🧰 Stack
 
-Cursor (cloud agents, Bugbot), GitHub Actions, Cloudflare, JavaScript / TypeScript.
+Cursor (cloud agents), GitHub Actions, Cloudflare, JavaScript / TypeScript.
 
 ## ❤️ Likes
 
-Rock music, Marvel, Chiikawa, programming, and sushi.
+Rock music, Chiikawa, Hollow Knight, programming, and sushi.
 
 ## ✉️ Work with me
 
-Open to almost anything. Just send an email: kira@kyto64.com
+Open to almost anything. Just send an email: kira@kyto.jp
