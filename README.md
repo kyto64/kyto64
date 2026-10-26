@@ -4,11 +4,12 @@
 
 Hi there.<br>I'm [Keito Kira](https://kyto.jp) from Japan🗾
 
-kyto is an indie developer in Fukuoka who builds small, fast tools, with AI coding agents doing much of the work (AI-driven development). Solo projects are run by splitting the work across role-based AI bots.
+kyto is an indie developer in Fukuoka, leaning backend, who builds small, fast tools, with AI coding agents doing much of the work (AI-driven development). Solo projects are run by splitting the work across role-based AI bots. The aim is development where people and AI share the same reference for the spec.
 
 ## 🚧 Now
 
-- [youtublur - a Chrome extension that fills the empty space around the YouTube player with a blur matched to the video.](https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj)
+- [youtublur - a Chrome extension that fills the empty space around the YouTube player with a blur matched to the video. Also on Firefox Add-ons.](https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj)
+- [cursor-codex-review - a minimal setup where Codex CLI reviews a Plan made in Cursor, read-only.](https://github.com/kyto64/cursor-codex-review)
 - [aidd-templates - repository templates for AI-driven development (lean and scale variants).](https://github.com/kyto64/aidd-templates)
 - kyto.jp - this site, running on Cloudflare Workers.
 - [vscode-line-ref-copy - a VS Code extension that copies selected lines with line numbers and an optional file path; a public fork of yassh's "copy with line number" ().](https://github.com/yassh/vscode-copy-with-line-numbers)
@@ -31,7 +32,7 @@ kyto is an indie developer in Fukuoka who builds small, fast tools, with AI codi
 
 ## 🧰 Stack
 
-Claude Code (cloud), Codex (PR review), Grok Bot (role-based AI bots), GitHub Actions, Cloudflare Workers, JavaScript / TypeScript, Vue.
+Claude Code (cloud), Codex (PR review), Grok Bot (role-based AI bots), GitHub Actions, Cloudflare Workers, JavaScript / TypeScript, Vue. Day-to-day work: Ruby on Rails, Python / FastAPI, Vue, AWS, Docker.
 
 ## ❤️ Likes
 
