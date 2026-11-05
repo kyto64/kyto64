@@ -64,6 +64,7 @@ export function parseHumanMd(source) {
   }
 
   const sections = splitSections(source);
+  const location = parseLocation(source);
 
   for (const key of REQUIRED_SECTIONS) {
     if (!sections.has(key)) {
@@ -85,7 +86,17 @@ export function parseHumanMd(source) {
     }
   }
 
+  parsed.location = location;
   return parsed;
+}
+
+// 最初の `##` より前にある `- **Location:** ...` を読む。無ければ "Japan"。
+function parseLocation(source) {
+  const head = source.replace(/\r\n/g, "\n").split(/^##\s/m)[0];
+  const match = head.match(/^- \*\*Location:\*\*[ \t]*(.+?)[ \t]*$/m);
+  const value = match ? match[1].trim() : "";
+  if (!value) return "Japan";
+  return /japan/i.test(value) ? value : `${value}, Japan`;
 }
 
 function looksLikeHtml(source) {
@@ -155,7 +166,7 @@ function parseSectionBody(key, body) {
     }
     return {
       kind: "list",
-      items: lines.flatMap((line) => expandItem(parseItem(key, line))),
+      items: lines.flatMap((line) => expandItem(key, parseItem(key, line))),
     };
   }
 
@@ -182,20 +193,67 @@ export function parseItem(sectionKey, line) {
     );
   }
 
-  const urls = [...rest.matchAll(URL_RE)].map((found) =>
-    stripTrailingPunctuation(found[0]),
-  );
-  let description = rest;
-  for (const url of urls) {
-    description = description.replace(url, "");
-  }
-  description = description.replace(/\s+/g, " ").replace(/^[,\s]+|[,\s]+$/g, "").trim();
+  const { url, urls, allUrls, description } = splitUrls(rest);
 
-  return { name, description, url: urls[0] ?? "", urls };
+  return { name, description, url, urls, allUrls };
 }
 
-function expandItem(item) {
-  const urls = item.urls.length > 0 ? item.urls : [item.url || ""];
+/**
+ * 項目の本文から主 URL と説明文を取り出す。規則:
+ * - 括弧の直後に始まる URL（例: 他人のリポジトリへのクレジット）は主 URL にしない
+ * - 残った URL のうち、行末に連なる URL 群（`Chrome: <url> Firefox: <url>` など）の先頭を主 URL にする
+ * - URL とその直前のラベル（`Chrome:` など）は説明から消す
+ */
+function splitUrls(rest) {
+  const found = [...rest.matchAll(URL_RE)].map((m) => {
+    const url = stripTrailingPunctuation(m[0]);
+    return {
+      url,
+      start: m.index,
+      end: m.index + url.length,
+      inline: m.index > 0 && rest[m.index - 1] === "(",
+    };
+  });
+
+  const outer = found.filter((f) => !f.inline);
+  let first = outer.length - 1;
+  while (first > 0) {
+    const gap = rest.slice(outer[first - 1].end, outer[first].start);
+    if (!/^[\s,]*(?:[A-Za-z][\w-]*:)?\s*$/.test(gap)) break;
+    first -= 1;
+  }
+  const primary = outer.length > 0 ? outer[first].url : "";
+  const urls = outer.slice(first).map((f) => f.url);
+
+  let description = "";
+  let cursor = 0;
+  for (const f of found) {
+    description += rest.slice(cursor, f.start);
+    if (!f.inline) description = description.replace(/\s*[A-Za-z][\w-]*:\s*$/, " ");
+    cursor = f.end;
+  }
+  description += rest.slice(cursor);
+  description = description
+    .replace(/\s*\(\s*\)/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/(?:^|\s)(?:Chrome|Firefox|Safari|Edge):(?=\s|$)/g, "")
+    .replace(/\s+([,.;])/g, "$1")
+    .replace(/^[,;:\s]+|[,;:\s]+$/g, "")
+    .trim();
+
+  // Contributions 展開用。主 URL を選ぶ末尾グループとは独立に、区切り文字（; など）に関係なく全 URL を保持する
+  const allUrls = outer.map((f) => f.url);
+
+  return { url: primary, urls, allUrls, description };
+}
+
+// 1 項目 = 1 箇条。ただし Contributions は PR ごとに 1 箇条にする
+// （説明が PR 番号になるため。例: pull/102, pull/107 → 2 箇条）。
+function expandItem(sectionKey, item) {
+  const urls = item.allUrls ?? item.urls;
+  if (sectionKey !== "contributions" || urls.length < 2) {
+    return [{ name: item.name, description: item.description, url: item.url }];
+  }
   return urls.map((url) => ({
     name: item.name,
     description: item.description,
@@ -251,7 +309,7 @@ function renderReadme(sections) {
     "",
     "# About Me",
     "",
-    "Hi there.<br>I'm [Keito Kira](https://kyto.jp) from Japan🗾",
+    `Hi there.<br>I'm [Keito Kira](https://kyto.jp) from ${sections.location ?? "Japan"}🗾`,
     "",
     aboutText,
   ];

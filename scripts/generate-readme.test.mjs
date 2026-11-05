@@ -133,7 +133,7 @@ test("自動生成コメントと既存の雰囲気を残す", () => {
   assert.match(actual, /^# About Me$/m);
   assert.match(
     actual,
-    /Hi there\.<br>I'm \[Keito Kira\]\(https:\/\/kyto\.jp\) from Japan🗾/,
+    /Hi there\.<br>I'm \[Keito Kira\]\(https:\/\/kyto\.jp\) from Fukuoka, Japan🗾/,
   );
   assert.match(actual, /## 🚧 Now/);
   assert.match(actual, /## 🛠️ Stuff I Made/);
@@ -230,6 +230,9 @@ test("項目を名前・説明・URL に分解する", () => {
       urls: [
         "https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj",
       ],
+      allUrls: [
+        "https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj",
+      ],
     },
   );
 });
@@ -266,6 +269,13 @@ hello
     actual,
     /\[joke2k\/faker \(co-authored\) - #2251\]\(https:\/\/github.com\/joke2k\/faker\/pull\/2251\)/,
   );
+});
+
+test("Contributions はセミコロン区切りの複数 PR URL も PR ごとに 1 行にする", () => {
+  const actual = generateReadme(fixture("human.semicolon-urls.md"));
+  assert.equal(actual, fixture("readme.semicolon-urls.md"));
+  assert.match(actual, /aws-sdk-rails - #102\]/);
+  assert.match(actual, /aws-sdk-rails - #107\]/);
 });
 
 test("本番 human.md から README を組み立てる", () => {
@@ -308,4 +318,42 @@ test("CLI は入力省略時に使い方を出して失敗する", () => {
   const result = runCli([]);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /使い方/);
+});
+
+test("1 項目 = 1 箇条: 主 URL は行末の URL、ストアラベルと括弧内 URL は説明から消える", () => {
+  const actual = generateReadme(fixture("human.multi-url.md"));
+  assert.equal(actual, fixture("readme.multi-url.md"));
+  const now = actual.split("## 🚧 Now")[1].split("## ")[0];
+  assert.equal(now.match(/^- /gm).length, 3);
+  assert.doesNotMatch(now, /\(\)|Chrome:|Firefox:|yassh\/vscode/);
+  assert.match(now, /\]\(https:\/\/github\.com\/kyto64\/vscode-line-ref-copy\)/);
+  assert.match(now, /\]\(https:\/\/chromewebstore\.google\.com\//);
+});
+
+test("parseItem は説明に空の () や余分な句読点を残さない", () => {
+  const item = parseItem(
+    "now",
+    "- **x** — fork of y (https://example.com/y), cool. Chrome: https://example.com/c Firefox: https://example.com/f",
+  );
+  assert.equal(item.description, "fork of y, cool.");
+  assert.equal(item.url, "https://example.com/c");
+});
+
+const withLocation = (line) => `# x\n\n${line}\n\n## About\n\nhello\n`;
+
+test("Location: Japan を含めばそのまま、都市名だけなら ', Japan' を補い、無ければ Japan", () => {
+  assert.match(
+    generateReadme(withLocation("- **Location:** Fukuoka, Japan")),
+    /from Fukuoka, Japan🗾/,
+  );
+  const city = generateReadme(withLocation("- **Location:** Fukuoka"));
+  assert.match(city, /from Fukuoka, Japan🗾/);
+  assert.doesNotMatch(city, /Japan, Japan/);
+  assert.match(generateReadme(withLocation("- **Location:** Japan")), /from Japan🗾/);
+  assert.match(generateReadme(withLocation("- **Vibe:** Developer")), /from Japan🗾/);
+});
+
+test("最初の ## より後ろの Location 行は無視する", () => {
+  const source = "# x\n\n## About\n\nhello\n\n## Links\n\n- **Location:** Tokyo\n";
+  assert.match(generateReadme(source), /from Japan🗾/);
 });
