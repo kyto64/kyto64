@@ -2,7 +2,7 @@
 
 # About Me
 
-Hi there.<br>I'm [Keito Kira](https://kyto.jp) from Japan🗾
+Hi there.<br>I'm [Keito Kira](https://kyto.jp) from Fukuoka, Japan🗾
 
 kyto is an indie developer in Fukuoka who builds small, fast tools, with AI coding agents doing much of the work (AI-driven development).
 
