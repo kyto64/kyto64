@@ -230,6 +230,9 @@ test("項目を名前・説明・URL に分解する", () => {
       urls: [
         "https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj",
       ],
+      allUrls: [
+        "https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj",
+      ],
     },
   );
 });
@@ -266,6 +269,13 @@ hello
     actual,
     /\[joke2k\/faker \(co-authored\) - #2251\]\(https:\/\/github.com\/joke2k\/faker\/pull\/2251\)/,
   );
+});
+
+test("Contributions はセミコロン区切りの複数 PR URL も PR ごとに 1 行にする", () => {
+  const actual = generateReadme(fixture("human.semicolon-urls.md"));
+  assert.equal(actual, fixture("readme.semicolon-urls.md"));
+  assert.match(actual, /aws-sdk-rails - #102\]/);
+  assert.match(actual, /aws-sdk-rails - #107\]/);
 });
 
 test("本番 human.md から README を組み立てる", () => {

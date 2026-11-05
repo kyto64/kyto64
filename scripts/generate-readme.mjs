@@ -193,9 +193,9 @@ export function parseItem(sectionKey, line) {
     );
   }
 
-  const { url, urls, description } = splitUrls(rest);
+  const { url, urls, allUrls, description } = splitUrls(rest);
 
-  return { name, description, url, urls };
+  return { name, description, url, urls, allUrls };
 }
 
 /**
@@ -241,16 +241,20 @@ function splitUrls(rest) {
     .replace(/^[,;:\s]+|[,;:\s]+$/g, "")
     .trim();
 
-  return { url: primary, urls, description };
+  // Contributions 展開用。主 URL を選ぶ末尾グループとは独立に、区切り文字（; など）に関係なく全 URL を保持する
+  const allUrls = outer.map((f) => f.url);
+
+  return { url: primary, urls, allUrls, description };
 }
 
 // 1 項目 = 1 箇条。ただし Contributions は PR ごとに 1 箇条にする
 // （説明が PR 番号になるため。例: pull/102, pull/107 → 2 箇条）。
 function expandItem(sectionKey, item) {
-  if (sectionKey !== "contributions" || item.urls.length < 2) {
+  const urls = item.allUrls ?? item.urls;
+  if (sectionKey !== "contributions" || urls.length < 2) {
     return [{ name: item.name, description: item.description, url: item.url }];
   }
-  return item.urls.map((url) => ({
+  return urls.map((url) => ({
     name: item.name,
     description: item.description,
     url,
