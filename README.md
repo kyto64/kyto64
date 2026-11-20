@@ -4,13 +4,14 @@
 
 Hi there.<br>I'm [Keito Kira](https://kyto.jp) from Fukuoka, Japan🗾
 
-kyto is an indie developer in Fukuoka, leaning backend, who builds small, fast tools, with AI coding agents doing much of the work (AI-driven development). Solo projects are run by splitting the work across role-based AI bots. The aim is development where people and AI share the same reference for the spec.
+kyto is an indie developer in Fukuoka, leaning backend, who builds small, fast tools, with AI coding agents doing much of the work (AI-driven development). His own information is kept in a single source of truth in Notion and shared across the AIs he uses, so every assistant works from the same facts. A personal AI assistant coordinates his role-based AI bots day to day; the bots and cloud coding agents do the implementation. The aim is development where people and AI share the same reference for the spec.
 
 ## 🚧 Now
 
 - [youtublur - a Chrome / Firefox extension that fills the empty space around the YouTube player with a soft blur matched to the video, or a theme-matched solid color.](https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj)
-- [cursor-codex-review - a minimal setup where Codex CLI reviews a Plan made in Cursor, read-only.](https://github.com/kyto64/cursor-codex-review)
+- [scraps.kyto.jp - where his writing lives. Short technical notes (he calls them scraps), written in a GitHub repository and mirrored to Zenn.](https://scraps.kyto.jp)
 - [aidd-templates - repository templates for AI-driven development (lean and scale variants).](https://github.com/kyto64/aidd-templates)
+- [cursor-codex-review - a minimal setup where Codex CLI reviews a Plan made in Cursor, read-only.](https://github.com/kyto64/cursor-codex-review)
 - kyto.jp - this site, running on Cloudflare Workers.
 - [vscode-line-ref-copy - a VS Code extension (Marketplace: Line Ref Copy) that copies selected lines with line numbers and an optional file path; a public fork of yassh's "copy with line number" (credit: yassh).](https://github.com/kyto64/vscode-line-ref-copy)
 
@@ -31,11 +32,7 @@ kyto is an indie developer in Fukuoka, leaning backend, who builds small, fast t
 
 ## 🧰 Stack
 
-Claude Code (cloud), Codex (PR review), Grok Bot (role-based AI bots), GitHub Actions, Cloudflare Workers, JavaScript / TypeScript, Vue. Day-to-day work: Ruby on Rails, Python / FastAPI, Vue, AWS, Docker.
-
-## ❤️ Likes
-
-Rock music, Chiikawa, Hollow Knight, programming, and sushi.
+Claude Code (cloud), Codex (PR review), Grok Bot (role-based AI bots), Muse (personal AI assistant), GitHub Actions, Cloudflare Workers, Astro, JavaScript / TypeScript, Vue. Day-to-day work: Ruby on Rails, Python / FastAPI, Vue, AWS, Docker, and Java / Spring Boot since 2026.
 
 ## ✉️ Work with me
 
