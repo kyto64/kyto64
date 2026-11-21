@@ -9,7 +9,7 @@ kyto is an indie developer in Fukuoka, leaning backend, who builds small, fast t
 ## 🚧 Now
 
 - [youtublur - a Chrome / Firefox extension that fills the empty space around the YouTube player with a soft blur matched to the video, or a theme-matched solid color.](https://chromewebstore.google.com/detail/npkiobfoclnkmobjhgadnjepceofjenj)
-- [scraps.kyto.jp - where his writing lives. Short technical notes (he calls them scraps), written in a GitHub repository and mirrored to Zenn.](https://scraps.kyto.jp)
+- [scraps.kyto.jp - where his writing lives. Short technical notes (he calls them scraps), written in a GitHub repository.](https://scraps.kyto.jp)
 - [aidd-templates - repository templates for AI-driven development (lean and scale variants).](https://github.com/kyto64/aidd-templates)
 - [cursor-codex-review - a minimal setup where Codex CLI reviews a Plan made in Cursor, read-only.](https://github.com/kyto64/cursor-codex-review)
 - kyto.jp - this site, running on Cloudflare Workers.
