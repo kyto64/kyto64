@@ -32,7 +32,12 @@ kyto is an indie developer in Fukuoka, leaning backend, who builds small, fast t
 
 ## 🧰 Stack
 
-Claude Code (cloud), Codex (PR review), Grok Bot (role-based AI bots), Muse (personal AI assistant), GitHub Actions, Cloudflare Workers, Astro, JavaScript / TypeScript, Vue. Day-to-day work: Ruby on Rails, Python / FastAPI, Vue, AWS, Docker, and Java / Spring Boot since 2026.
+- Languages - Ruby, Python, TypeScript / JavaScript, SQL, Java
+- Frameworks - Ruby on Rails, FastAPI, Vue.js, Spring Boot, Astro
+- Data - PostgreSQL, MySQL, Redis, DynamoDB
+- Infrastructure - AWS, Terraform, Docker, Cloudflare Workers, GitHub Actions
+- Testing & observability - RSpec, Pytest, Datadog, Sentry, New Relic
+- AI-driven development - Humans and AI work from the same specs and rules — Claude Code and Codex in the development loop, a role-based AI bot fleet for operations, and a personal AI assistant coordinating
 
 ## ✉️ Work with me
 
